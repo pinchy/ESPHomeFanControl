@@ -1,0 +1,72 @@
+esphome:
+  name: fancontrol
+  platform: ESP32
+  board: featheresp32
+  includes:
+    - CustomFanOutput.h
+
+wifi:
+  ssid: "YOUR SSID HERE"
+  password: "YOUR PASSWORD HERE"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Fancontrol Fallback Hotspot"
+    password: "HOTSPOT PASSWORD HERE"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "esphome"
+
+ota:
+  password: "esphome"
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      icon: "mdi:ip"
+      name: fancontrol IP
+    ssid:
+      name: fancontrol SSID
+      icon: "mdi:access-point-network"
+    bssid:
+      name: fancontrol BSSID
+      icon: "mdi:access-point-network"
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi fancontrol"
+    update_interval: 60s
+
+
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO36
+      mode: INPUT
+      inverted: True
+    name: "Fan Button"
+
+
+output:
+  - platform: custom
+    type: float 
+    lambda: |-
+      auto my_custom_fan_output = new CustomFanOutput();
+      App.register_component(my_custom_fan_output);
+      return {my_custom_fan_output};
+
+    outputs:
+      id: my_custom_fan
+
+fan:
+  - platform: speed
+    output: my_custom_fan
+    name: "Kitchen Fan"
+
